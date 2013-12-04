@@ -1,0 +1,86 @@
+CROSS_HOST="x86_64-w64-mingw32"
+inherit cross gnome2
+
+NAME="mingw64-x86_64-webkitgtk"
+VERSION=1.10.2
+RELEASE=3
+CATEGORY="Devel"
+SUMMARY="WebKit web browser engine for Win64 toolchain"
+DESCRIPTION="WebKit is an open source web browser engine. WebKit's HTML and
+JavaScript code began as a branch of the KHTML and KJS libraries from
+KDE."
+HOMEPAGE="http://www.webkitgtk.org/"
+SRC_URI="http://www.webkitgtk.org/releases/webkitgtk-${VERSION}.tar.xz"
+SRC_DIR="webkitgtk-${VERSION}"
+
+PATCH_URI="
+	http://pkgs.fedoraproject.org/cgit/webkitgtk.git/plain/webkit-1.10.2-renderFix.patch?h=f18
+	http://pkgs.fedoraproject.org/cgit/webkitgtk.git/plain/webkit-1.10.2-atkFix.patch?h=f18
+	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkit-1.9.6-wk2-tests.patch?h=f18
+	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkit-dont-build-dump-render-tree.patch?h=f18
+"
+
+DISTCLEANFILES="Source/WebKit/gtk/po/*.mo"
+DIFF_EXCLUDES="*.po"
+
+# libwebkitgtk debuginfo is too large (objcopy bails due to insufficient memory)
+CFLAGS+=" -ggdb1"
+CXXFLAGS+=" -ggdb1"
+
+PKG_NAMES="${NAME}1.0 ${NAME}3.0"
+mingw64_x86_64_webkitgtk1_0_SUMMARY="GTK+2 ${SUMMARY}"
+mingw64_x86_64_webkitgtk1_0_CONTENTS="${CROSS_BINDIR#/}/*-1.0-0.dll
+	${CROSS_INCLUDEDIR#/}/webkitgtk-1.0/ ${CROSS_LIBDIR#/}/lib*-1.0.*
+	${CROSS_LIBDIR#/}/pkgconfig/*-1.0.pc ${CROSS_DATADIR#/}/locale/*/*/*-2.0.*
+	${CROSS_DATADIR#/}/webkitgtk-1.0/ usr/share/doc/${NAME}1.0/"
+mingw64_x86_64_webkitgtk3_0_SUMMARY="GTK+3 ${SUMMARY}"
+mingw64_x86_64_webkitgtk3_0_CONTENTS="${CROSS_BINDIR#/}/*-3.0-0.dll
+	${CROSS_INCLUDEDIR#/}/webkitgtk-3.0/ ${CROSS_LIBDIR#/}/lib*-3.0.*
+	${CROSS_LIBDIR#/}/pkgconfig/*-3.0.pc ${CROSS_DATADIR#/}/locale/*/*/*-3.0.*
+	${CROSS_DATADIR#/}/webkitgtk-3.0/ usr/share/doc/${NAME}3.0/"
+
+ACLOCAL_FLAGS="-I Source/autotools"
+CYGCONF_ARGS="
+	--with-target=win32
+	--disable-geolocation
+	--disable-introspection
+	--disable-jit
+	--disable-webkit2
+	--disable-gtk-doc-html
+"
+
+src_compile() {
+	cd ${S}
+	gnome2_autoreconf
+
+	# Workaround for linker failure while building the static library
+	# libtool: link: (cd .libs/libjavascriptcoregtk-1.0.lax/libWTF.a && /usr/bin/x86_64-w64-mingw32-ar x "/builddir/build/BUILD/webkitgtk-2.0.4/build_win32/./.libs/libWTF.a")
+	# /usr/bin/x86_64-w64-mingw32-ar: `x' cannot be used on thin archives.
+	# make[1]: *** [libjavascriptcoregtk-1.0.la] Error 1
+	export AR_FLAGS="cru"
+
+	mkdir -p ${B}/gtk2
+	cd ${B}/gtk2
+	gnome2_configure --with-gtk=2.0 --with-gstreamer=0.10
+	mkdir -p DerivedSources/{webkit,WebCore,ANGLE,WebKit2/webkit2gtk/webkit2,InjectedBundle}
+	make ${MAKEOPTS} -k || make ${MAKEOPTS} -k || cygmake -j1
+
+	mkdir -p ${B}/gtk3
+	cd ${B}/gtk3
+	gnome2_configure --with-gtk=3.0 --with-gstreamer=1.0
+	mkdir -p DerivedSources/{webkit,WebCore,ANGLE,WebKit2/webkit2gtk/webkit2,InjectedBundle}
+	make ${MAKEOPTS} -k || make ${MAKEOPTS} -k || cygmake -j1
+}
+
+src_install() {
+	cd ${B}/gtk2
+	cyginstall bin_PROGRAMS=
+	cd ${B}/gtk3
+	cyginstall bin_PROGRAMS=
+
+	cd ${S}
+	docinto /${NAME}1.0
+	dodoc ChangeLog NEWS Source/WebCore/LICENSE-{APPLE,-LGPL-2.1}
+	docinto /${NAME}3.0
+	dodoc ChangeLog NEWS Source/WebCore/LICENSE-{APPLE,-LGPL-2.1}
+}
