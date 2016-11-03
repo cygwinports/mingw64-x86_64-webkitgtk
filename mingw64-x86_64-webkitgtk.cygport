@@ -3,7 +3,7 @@ inherit cross gnome2
 
 NAME="mingw64-x86_64-webkitgtk"
 VERSION=2.2.8
-RELEASE=2
+RELEASE=3
 CATEGORY="Devel"
 SUMMARY="WebKit web browser engine for Win64 toolchain"
 DESCRIPTION="WebKit is an open source web browser engine. WebKit's HTML and
@@ -31,6 +31,7 @@ PATCH_URI="
 	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/0028-Use-after-free-in-WTF-threading-code.patch?h=f20
 	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/0016-non-volatile-refc-in-audio.mingw.patch?h=f20
 	2.2.8-glib244.patch
+	2.2.8-gcc5.patch
 "
 
 DISTCLEANFILES="Source/WebKit/gtk/po/*.mo"
@@ -71,13 +72,11 @@ src_compile() {
 	mkdir -p ${B}/gtk2
 	cd ${B}/gtk2
 	gnome2_configure --with-gtk=2.0
-	mkdir -p DerivedSources/{webkit,WebCore,ANGLE,WebKit2/webkit2gtk/webkit2,InjectedBundle}
 	cygmake
 
 	mkdir -p ${B}/gtk3
 	cd ${B}/gtk3
 	gnome2_configure --with-gtk=3.0
-	mkdir -p DerivedSources/{webkit,WebCore,ANGLE,WebKit2/webkit2gtk/webkit2,InjectedBundle}
 	cygmake
 }
 

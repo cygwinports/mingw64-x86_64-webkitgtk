@@ -1,0 +1,37 @@
+wrt JSObject:
+https://gcc.gnu.org/bugzilla/show_bug.cgi?id=65292
+https://bugreports.qt.io/browse/QTBUG-44829
+
+--- origsrc/webkitgtk-2.2.8/Source/autotools/CheckSystemAndBasicDependencies.m4	2014-10-01 01:34:01.000000000 -0500
++++ src/webkitgtk-2.2.8/Source/autotools/CheckSystemAndBasicDependencies.m4	2016-10-31 15:01:48.631840700 -0500
+@@ -82,7 +82,7 @@ AC_SYS_LARGEFILE
+ c_compiler="unknown"
+ AC_LANG_PUSH([C])
+ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+-#if !(defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 7)
++#if !(defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)))
+ #error Not a supported GCC compiler
+ #endif
+ ])], [c_compiler="gcc"], [])
+@@ -101,7 +101,7 @@ fi
+ cxx_compiler="unknown"
+ AC_LANG_PUSH([C++])
+ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([
+-#if !(defined(__GNUG__) && defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && __GNUC__ >= 4 && __GNUC_MINOR__ >= 7)
++#if !(defined(__GNUG__) && defined(__GNUC__) && !defined(__clang__) && !defined(__INTEL_COMPILER) && (__GNUC__ >= 5 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)))
+ #error Not a supported G++ compiler
+ #endif
+ ])], [cxx_compiler="g++"], [])
+--- origsrc/webkitgtk-2.2.8/Source/JavaScriptCore/runtime/JSObject.cpp	2014-10-01 01:33:53.000000000 -0500
++++ src/webkitgtk-2.2.8/Source/JavaScriptCore/runtime/JSObject.cpp	2016-11-02 12:06:23.930369500 -0500
+@@ -1888,6 +1888,10 @@
+     }
+ }
+ 
++template void JSObject::putByIndexBeyondVectorLengthWithoutAttributes<Int32Shape>(ExecState* exec, unsigned i, JSValue value);
++template void JSObject::putByIndexBeyondVectorLengthWithoutAttributes<DoubleShape>(ExecState* exec, unsigned i, JSValue value);
++template void JSObject::putByIndexBeyondVectorLengthWithoutAttributes<ContiguousShape>(ExecState* exec, unsigned i, JSValue value);
++
+ void JSObject::putByIndexBeyondVectorLengthWithArrayStorage(ExecState* exec, unsigned i, JSValue value, bool shouldThrow, ArrayStorage* storage)
+ {
+     VM& vm = exec->vm();
