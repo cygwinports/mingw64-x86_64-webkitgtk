@@ -2,8 +2,8 @@ CROSS_HOST="x86_64-w64-mingw32"
 inherit cross gnome2
 
 NAME="mingw64-x86_64-webkitgtk"
-VERSION=2.2.8
-RELEASE=3
+VERSION=2.4.11
+RELEASE=1
 CATEGORY="Devel"
 SUMMARY="WebKit web browser engine for Win64 toolchain"
 DESCRIPTION="WebKit is an open source web browser engine. WebKit's HTML and
@@ -12,26 +12,9 @@ KDE."
 HOMEPAGE="http://www.webkitgtk.org/"
 SRC_URI="http://www.webkitgtk.org/releases/webkitgtk-${VERSION}.tar.xz"
 SRC_DIR="webkitgtk-${VERSION}"
-
 PATCH_URI="
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkitgtk-remove-reference-to-nonexisting-header.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkitgtk-mingw-use-gcc-asm.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkit-dont-build-dump-render-tree.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkitgtk-mingw-dont-declare-readwritebarrier.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkitgtk-mingw-compile-fix.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkitgtk-mingw-prevent-no-error-name-conflict.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkitgtk-mingw-fix-includes.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkit-fix-angle-windows-compilation.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkitgtk-mingw-m-pi.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkitgtk-prevent-multiple-plugins-definitions.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkitgtk-mingw-opengl.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkitgtk-dont-build-test-webkit-api.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkitgtk-redo-commit-148663.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/webkitgtk-workaround-conflicting-htonl-on-win64.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/0028-Use-after-free-in-WTF-threading-code.patch?h=f20
-	http://pkgs.fedoraproject.org/cgit/mingw-webkitgtk.git/plain/0016-non-volatile-refc-in-audio.mingw.patch?h=f20
-	2.2.8-glib244.patch
-	2.2.8-gcc5.patch
+	http://pkgs.fedoraproject.org/cgit/rpms/mingw-webkitgtk.git/plain/webkitgtk-2.4.9-abs.patch
+	http://pkgs.fedoraproject.org/cgit/rpms/mingw-webkitgtk.git/plain/webkitgtk-2.4.3-gcc-asm.all.patch
 "
 
 DISTCLEANFILES="Source/WebKit/gtk/po/*.mo"
@@ -55,10 +38,11 @@ mingw64_x86_64_webkitgtk3_0_CONTENTS="${CROSS_BINDIR#/}/*-3.0-0.dll
 
 ACLOCAL_FLAGS="-I Source/autotools"
 CYGCONF_ARGS="
-	--with-target=win32
+	--enable-win32-target
 	--disable-static
 	--disable-accelerated-compositing
 	--disable-credential-storage
+	--disable-egl
 	--disable-geolocation
 	--disable-introspection
 	--disable-webkit2
